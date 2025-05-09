@@ -22,35 +22,41 @@ databricks apps deploy
 
 ### 2. Configure OAuth Scopes
 
-**Important**: OAuth scopes for on-behalf-of-user authorization must be configured using the Databricks CLI, not in the app.yaml file or the UI.
+This document explains how to properly set up on-behalf-of-user authorization for Databricks Apps.
 
-Use the provided script to configure the required OAuth scopes:
+#### Overview
 
+On-behalf-of-user authorization allows a Databricks App to access resources using the permissions of the logged-in user. This provides several benefits:
+
+- Users can only access resources they have permission to
+- Permissions are managed through standard Databricks/Unity Catalog mechanisms
+- No need to grant broad permissions to the app's service principal
+
+#### Important: Use Databricks CLI
+
+OAuth scopes for on-behalf-of-user authorization must be configured using the Databricks CLI, not in the app.yaml file or the UI.
+
+#### Required CLI Commands
+
+#### Add account admin profile to CLI
+0. Login to CLI as accont admin
 ```bash
-# Make the script executable
-chmod +x configure_oauth_scopes.sh
-
-# Run the script
-./configure_oauth_scopes.sh
+auth login --account-id ccb842e7-2376-4152-b0b0-29fa952379b8 --profile test2
+Host: https://accounts.azuredatabricks.net/
 ```
 
-Alternatively, you can run the commands manually:
-
+#### Adding Extra scope steps using Databricks CLI
+1. Get all custom app integrations
 ```bash
-# Get the app ID
-APP_ID=$(databricks apps list --output-json | grep -B2 -A2 '"name": "streamlit-data-app-obo-user"' | grep '"id":' | head -1 | sed 's/.*"id": "\([^"]*\)".*/\1/')
-
-# Configure OAuth scopes
-databricks apps update-oauth-config "$APP_ID" \
-  --scopes=volumes:read \
-  --scopes=volumes:write \
-  --scopes=catalog:read \
-  --scopes=files:read \
-  --scopes=files:write \
-  --scopes=unity-catalog:access \
-  --scopes=workspace:access \
-  --scopes=iam:access-control:read \
-  --scopes=iam:current-user:read
+databricks account custom-app-integration list
+```
+2. Find your app integration and get the current scopes
+```bash
+databricks account custom-app-integration get 'e08f4a41-eea6-402c-926c-d28f3cdf0868'
+```
+3. Add required scopes for OBO for your app.
+```bash
+databricks account custom-app-integration update 'e08f4a41-eea6-402c-926c-d28f3cdf0868' --json '{"scopes": [ "offline_access","email","iam.current-user:read","openid","iam.access-control:read","profile","all-apis"]}'
 ```
 
 ### 3. Set Permissions
@@ -75,47 +81,6 @@ If users encounter permission errors:
 2. Check that users have appropriate permissions on the volumes they're trying to access
 3. Have users log out and log back in to trigger the consent flow again
 4. Use the "Test Authentication" button in the app's troubleshooting section to diagnose issues
-
-## On-Behalf-of-User Authorization Guide
-
-This document explains how to properly set up on-behalf-of-user authorization for Databricks Apps.
-
-## Overview
-
-On-behalf-of-user authorization allows a Databricks App to access resources using the permissions of the logged-in user. This provides several benefits:
-
-- Users can only access resources they have permission to
-- Permissions are managed through standard Databricks/Unity Catalog mechanisms
-- No need to grant broad permissions to the app's service principal
-
-## OAuth Scopes Configuration
-
-### Important: Use Databricks CLI
-
-OAuth scopes for on-behalf-of-user authorization must be configured using the Databricks CLI, not in the app.yaml file or the UI.
-
-### Required CLI Commands
-
-## Add account admin profile to CLI
-0. Login to CLI as accont admin
-```bash
-auth login --account-id ccb842e7-2376-4152-b0b0-29fa952379b8 --profile test2
-Host: https://accounts.azuredatabricks.net/
-```
-
-## Adding Extra scope steps using Databricks CLI
-1. Get all custom app integrations
-```bash
-databricks account custom-app-integration list
-```
-2. Find your app integration and get the current scopes
-```bash
-databricks account custom-app-integration get 'e08f4a41-eea6-402c-926c-d28f3cdf0868'
-```
-3. Add required scopes for OBO for your app.
-```bash
-databricks account custom-app-integration update 'e08f4a41-eea6-402c-926c-d28f3cdf0868' --json '{"scopes": [ "offline_access","email","iam.current-user:read","openid","iam.access-control:read","profile","all-apis"]}'
-```
 
 ### Recommended Scopes for Unity Catalog Volume Access
 
