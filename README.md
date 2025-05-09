@@ -12,6 +12,20 @@ A Streamlit app that allows users to upload files to Unity Catalog volumes using
 
 ## Setup Instructions
 
+### 2. Create an app
+
+```bash
+git clone https://github.com/Mmodarre/Databricks-Apps-Unity-Catalog-File-Uploader.git
+cd src
+databricks apps create
+```
+
+#### 2.1 Test locally using PAT Token
+
+```bash
+streamlit run app.py
+```
+
 ### 1. Deploy the App
 
 Deploy the app to your Databricks workspace:
