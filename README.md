@@ -2,6 +2,8 @@
 
 A Streamlit app that allows users to upload files to Unity Catalog volumes using on-behalf-of-user authorization.
 
+![alt text](image.png)
+
 ## Features
 
 - Upload files to Unity Catalog volumes
