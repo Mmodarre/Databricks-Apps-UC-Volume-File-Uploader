@@ -159,9 +159,9 @@ with st.sidebar:
     st.header("Volume Configuration")
     
     # Get volume path components
-    catalog = st.text_input("Catalog Name", "mehdidatalake_catalog")
-    schema = st.text_input("Schema Name", "wwi_staging2")
-    volume = st.text_input("Volume","apps_goose")
+    catalog = st.text_input("Catalog Name", "")
+    schema = st.text_input("Schema Name", "")
+    volume = st.text_input("Volume","")
     
     st.markdown("---")
     st.header("Authentication")
